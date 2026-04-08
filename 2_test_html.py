@@ -45,19 +45,14 @@ if __name__ == '__main__':
     creds = authenticate_gmail()
     service = build('gmail', 'v1', credentials=creds)
 
-    html_body = """
-    <html>
-    <body>
-        <h1 style="color:blue;">Hola desde Gmail API</h1>
-        <p>Este es un <b>correo HTML</b> enviado con Python.</p>
-        <p>Saludos,<br>Tu script</p>
-    </body>
-    </html>
-    """
+    with open("plantilla_registro.html", "r", encoding="utf-8") as archivo:
+        mi_html = archivo.read()
+
+    html_body = mi_html
 
     mensaje = create_message_html(
-        sender="felipe.buitragoca@autonoma.edu.co",
-        to="felipebuitragocarmona@gmail.com",
+        sender="laucagomez1615@gmail.com",
+        to="laura.cardona43736@ucaldas.edu.co",
         subject="Correo HTML con Gmail API",
         html_content=html_body
     )

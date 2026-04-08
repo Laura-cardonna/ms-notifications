@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Código de Verificación - KALA Buses</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            background-color: #FFB6C1;
+            color: #000000;
+            text-align: center;
+            padding: 20px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .content {
+            padding: 30px;
+            color: #333333;
+        }
+        .content h2 {
+            color: #FFB6C1;
+            font-size: 20px;
+        }
+        .content p {
+            line-height: 1.6;
+        }
+        .verification-code-box {
+            background-color: #f0f0f0;
+            border: 2px solid #FFB6C1;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .verification-code-box p {
+            margin: 0 0 10px 0;
+            color: #666666;
+            font-size: 14px;
+        }
+        .code {
+            font-size: 32px;
+            font-weight: bold;
+            color: #FFB6C1;
+            letter-spacing: 5px;
+            font-family: 'Courier New', monospace;
+        }
+        .code-validity {
+            margin-top: 10px;
+            font-size: 12px;
+            color: #FF6B9D;
+            font-weight: bold;
+        }
+        .button {
+            display: inline-block;
+            background-color: #FFB6C1;
+            color: #000000;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .warning {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .footer {
+            background-color: #000000;
+            color: #ffffff;
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Verifica tu Cuenta</h1>
+        </div>
+        <div class="content">
+            <h2>Código de Verificación</h2>
+            <p>Hola [Nombre del Usuario],</p>
+            <p>Hemos recibido una solicitud para acceder a tu cuenta en KALA Buses. Para continuar, debes verificar tu identidad utilizando el siguiente código:</p>
+            
+            <div class="verification-code-box">
+                <p>Tu código de verificación es:</p>
+                <div class="code">[CODIGO_VERIFICACION]</div>
+                <div class="code-validity">Este código expira en 15 minutos</div>
+            </div>
+            
+            <p><strong>¿Cómo ingresarlo?</strong></p>
+            <p>Copia el código anterior y pégalo en el campo de verificación de tu navegador o aplicación móvil.</p>
+            
+            <div class="warning">
+                <strong>⚠️ Por tu seguridad:</strong> Nunca compartas este código con nadie. Los empleados de KALA Buses nunca te pedirán este código. Si no solicitaste este código, ignora este correo.
+            </div>
+            
+            <p>Si necesitas ayuda, puedes contactarnos a través de nuestro sitio web o aplicación móvil.</p>
+            
+            <a href="http://localhost:4200/home" class="button">Ir a KALA Buses</a>
+        </div>
+        <div class="footer">
+            <p>&copy; 2024 KALA Buses. Todos los derechos reservados.</p>
+            <p>Este es un correo de seguridad. Por favor, no respondas a este correo.</p>
+        </div>
+    </div>
+</body>
+</html>
