@@ -299,6 +299,69 @@ def enviar_codigo_verificacion():
             'status': 'Error en el servidor'
         }), 500
 
+@app.route('/api/enviar-cambio-contrasena', methods=['POST'])
+def enviar_cambio_contrasena():
+    """
+    Endpoint para enviar correo de cambio de contraseña
+    JSON esperado:
+    {
+        "nombre": "Juan",
+        "destinatario": "juan@example.com",
+        "remitente": "tu-email@gmail.com",
+        "asunto": "Cambiar tu Contraseña - KALA Buses",
+        "urlCambio": "https://sistema.com/reset-password?token=xxxxx",
+        "tiempoValidez": "30 minutos"
+    }
+    """
+    try:
+        datos = request.get_json()
+        
+        # Validar datos requeridos
+        if not all(key in datos for key in ['nombre', 'destinatario', 'remitente', 'asunto', 'urlCambio', 'tiempoValidez']):
+            return jsonify({
+                'success': False,
+                'error': 'Faltan campos requeridos: nombre, destinatario, remitente, asunto, urlCambio, tiempoValidez'
+            }), 400
+        
+        nombre = datos['nombre']
+        destinatario = datos['destinatario']
+        remitente = datos['remitente']
+        asunto = datos['asunto']
+        url_cambio = datos['urlCambio']
+        tiempo_validez = datos['tiempoValidez']
+        
+        # Cargar y procesar plantilla HTML
+        try:
+            with open("plantilla_cambio_contrasena.html", "r", encoding="utf-8") as archivo:
+                html_template = archivo.read()
+        except FileNotFoundError:
+            return jsonify({
+                'success': False,
+                'error': 'Archivo plantilla_cambio_contrasena.html no encontrado'
+            }), 400
+        
+        # Reemplazar variables en la plantilla
+        html_procesado = html_template.replace('[Nombre del Usuario]', nombre) \
+                                      .replace('[URL_CAMBIO_CONTRASENA]', url_cambio) \
+                                      .replace('[TIEMPO_VALIDEZ]', tiempo_validez)
+        
+        # Autenticar y crear servicio
+        creds = authenticate_gmail()
+        service = build('gmail', 'v1', credentials=creds)
+        
+        # Crear y enviar mensaje
+        mensaje = create_message_html(remitente, destinatario, asunto, html_procesado)
+        resultado = send_message(service, 'me', mensaje)
+        
+        return jsonify(resultado), 200 if resultado['success'] else 400
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'status': 'Error en el servidor'
+        }), 500
+
 @app.route('/api/endpoints', methods=['GET'])
 def listar_endpoints():
     """Lista todos los endpoints disponibles"""
@@ -333,6 +396,12 @@ def listar_endpoints():
                 'metodo': 'POST',
                 'url': '/api/enviar-multiples',
                 'parametros': ['nombre', 'destinatarios', 'remitente', 'asunto', 'contenido']
+            },
+            {
+                'nombre': 'Enviar Cambio de Contraseña',
+                'metodo': 'POST',
+                'url': '/api/enviar-cambio-contrasena',
+                'parametros': ['nombre', 'destinatario', 'remitente', 'asunto', 'urlCambio', 'tiempoValidez']
             }
         ]
     }), 200
