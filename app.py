@@ -4,6 +4,7 @@ import base64
 from email.mime.text import MIMEText
 import os
 import pickle
+import requests
 
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -361,6 +362,89 @@ def enviar_cambio_contrasena():
             'error': str(e),
             'status': 'Error en el servidor'
         }), 500
+
+# ===================== HU-3-013: ALERTAS DE CLIMA =====================
+# Remitente por defecto del sistema (la cuenta Gmail autenticada). Se puede
+# sobreescribir pasando "remitente" en el payload.
+REMITENTE_CLIMA = os.environ.get('GMAIL_REMITENTE', 'tamayodahiana51@gmail.com')
+
+@app.route('/api/enviar-clima', methods=['POST'])
+def enviar_clima():
+    """
+    Envía la alerta de clima por email (HTML). Lo invoca el orquestador LangGraph
+    de back-logic.
+    JSON esperado:
+    { "destinatario": "x@mail.com", "asunto": "...", "pronostico": "...",
+      "recomendacion": "...", "remitente": "opcional" }
+    """
+    try:
+        datos = request.get_json() or {}
+        if not all(k in datos for k in ['destinatario', 'asunto', 'pronostico']):
+            return jsonify({
+                'success': False,
+                'error': 'Faltan campos requeridos: destinatario, asunto, pronostico'
+            }), 400
+
+        destinatario = datos['destinatario']
+        asunto = datos['asunto']
+        pronostico = datos['pronostico']
+        recomendacion = datos.get('recomendacion', '')
+        remitente = datos.get('remitente', REMITENTE_CLIMA)
+
+        try:
+            with open("plantilla_clima.html", "r", encoding="utf-8") as archivo:
+                html_template = archivo.read()
+        except FileNotFoundError:
+            return jsonify({
+                'success': False,
+                'error': 'Archivo plantilla_clima.html no encontrado'
+            }), 400
+
+        html_procesado = (html_template
+                          .replace('[PRONOSTICO]', pronostico)
+                          .replace('[RECOMENDACION]', recomendacion))
+
+        creds = authenticate_gmail()
+        service = build('gmail', 'v1', credentials=creds)
+        mensaje = create_message_html(remitente, destinatario, asunto, html_procesado)
+        resultado = send_message(service, 'me', mensaje)
+        return jsonify(resultado), 200 if resultado['success'] else 400
+
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e), 'status': 'Error en el servidor'}), 500
+
+@app.route('/api/enviar-telegram', methods=['POST'])
+def enviar_telegram():
+    """
+    Envía un mensaje por Telegram vía Bot API (HTTP, sin Telethon). El bot del
+    sistema se configura con TELEGRAM_BOT_TOKEN; el destino (chat_id) lo guarda
+    cada usuario en su alerta. Se acepta "token" opcional para sobreescribir.
+    JSON esperado: { "chat_id": "123456", "mensaje": "...", "token": "opcional" }
+    """
+    try:
+        datos = request.get_json() or {}
+        chat_id = datos.get('chat_id')
+        mensaje = datos.get('mensaje')
+        if not chat_id or not mensaje:
+            return jsonify({'success': False, 'error': 'Faltan campos: chat_id, mensaje'}), 400
+
+        token = datos.get('token') or os.environ.get('TELEGRAM_BOT_TOKEN')
+        if not token:
+            return jsonify({
+                'success': False,
+                'error': 'No hay TELEGRAM_BOT_TOKEN configurado ni token en el payload'
+            }), 400
+
+        resp = requests.post(
+            f'https://api.telegram.org/bot{token}/sendMessage',
+            json={'chat_id': chat_id, 'text': mensaje},
+            timeout=10,
+        )
+        ok = resp.status_code == 200 and resp.json().get('ok', False)
+        return jsonify({'success': ok, 'telegram': resp.json()}), 200 if ok else 400
+
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e), 'status': 'Error en el servidor'}), 500
 
 @app.route('/api/endpoints', methods=['GET'])
 def listar_endpoints():
