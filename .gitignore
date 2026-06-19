@@ -4,4 +4,4 @@ confidencial/*
 .venv/
 token.pickle
 confidencial/token.pickle
-confidencial/credentials.json
+confidencial/credentials.json.env
